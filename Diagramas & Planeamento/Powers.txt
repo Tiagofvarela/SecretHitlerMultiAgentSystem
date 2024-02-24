@@ -1,0 +1,26 @@
+Power Flow.
+Manager broadcasts FINAL_POLICY.
+Players check policy against tracker and head to correct if.
+
+INVESTIGATE:
+Players send INVESTIGATE (player) to Manager.
+Manager broadcasts info.
+President sends INVESTIGATE (player) to Manager.
+Manager broadcasts info.
+Target sends role to President.
+President sends END to Manager.
+
+EXECUTE:
+Players EXECUTE (player) to Manager.
+Manager broadcasts info.
+President sends EXECUTE to his target.
+Target sends DEAD (isHitler) to Manager.
+Manager broadcasts DEAD (player, isHitler).
+President sends END to Manager.
+
+PEEK:
+President sends PEEK to Manager.
+Manager sends PEEK to Game.
+Game sends PEEK (3 cards) to Manager.
+Manager sends PEEK (3 cards) to President.
+President sends END to Manager.
