@@ -2,10 +2,13 @@ package agent.behaviour;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 
 import agent.communication.ACLMessageSecretHitler;
 import app.Policy;
@@ -31,13 +34,16 @@ public abstract class PlayerBehaviour {
     //Whether this agent should print all their thoughts or not.
 	protected boolean verbose;  
 	protected String name;
+	
+    Random rnd = new Random();
 
     protected PlayerBehaviour(AID id, List<AID> players, boolean verbose) {
-        this.id = id;
+        this.id = id;        
     	this.players = players;
+    	Collections.shuffle(this.players);
     	this.verbose = verbose;
         for (AID player :
-                players) {
+                this.players) {
             myOpinionOfOthers.put(player, 50);
         }
         name = id.getLocalName(); 
@@ -99,6 +105,7 @@ public abstract class PlayerBehaviour {
      * Updates who is current President and keeps track of the round.
      */
     public void updatePresident(AID newPresident) {
+    	printMap(myOpinionOfOthers);
         currentPresident = newPresident;
         round++;
     }
@@ -114,6 +121,7 @@ public abstract class PlayerBehaviour {
      * Keeps track that a government failed.
      */
 	public void failGovernment() {
+		updateChancellor(null);
 		failedGovernments += (failedGovernments+1) % 3;		
 	}
 
@@ -393,17 +401,21 @@ public abstract class PlayerBehaviour {
      * @return AID of agent I most dislike that is not in except or null if except.contains(opinions.keySet()).
      */
     protected AID getMostDislikedAID(Map<AID, Integer> opinions, List<AID> except) {
-        AID preferred = null;
         int minValue = 101;
-        for (Entry<AID, Integer> pair : opinions.entrySet()) {
+        List<Entry<AID, Integer>> list = shuffleMap(opinions);
+        List<AID> topChoices = new ArrayList<>();
+        for (Entry<AID, Integer> pair : list) {
         	if (except.contains(pair.getKey()))
             	continue;
-            if (pair.getValue() < minValue) {
-                preferred = pair.getKey();
-                minValue = pair.getValue();
+            if(pair.getValue() == minValue) {
+            	topChoices.add(pair.getKey());
+            }else if (pair.getValue() < minValue) {   
+            	topChoices.clear();
+            	topChoices.add(pair.getKey());
+            	minValue = pair.getValue();
             }            
         }
-        return preferred;
+        return topChoices.get(rnd.nextInt(topChoices.size()));
     }
     /**
      * @param opinions - Map of AID and corresponding opinion of them. Higher values are positive.
@@ -411,18 +423,35 @@ public abstract class PlayerBehaviour {
      * @return AID of agent I most like that is not in except or null if except.contains(opinions.keySet()).
      */
     protected AID getMostLikedAID(Map<AID, Integer> opinions, List<AID> except) {
-        AID preferred = null;
         int maxValue = -1;
-        for (Entry<AID, Integer> pair : opinions.entrySet()) {
+        List<Entry<AID, Integer>> list = shuffleMap(opinions);
+        List<AID> topChoices = new ArrayList<>();
+        for (Entry<AID, Integer> pair : list) {
         	if (except.contains(pair.getKey()))
             	continue;
-            if (pair.getValue() > maxValue) {
-                preferred = pair.getKey();
+            if(pair.getValue() == maxValue) {
+            	topChoices.add(pair.getKey());
+            }else if (pair.getValue() > maxValue) {            	
+                //preferred = pair.getKey();
+            	topChoices.clear();
+            	topChoices.add(pair.getKey());
                 maxValue = pair.getValue();
             }
         }
-        return preferred;
+        if(topChoices.isEmpty())
+        	return null;
+        return topChoices.get(rnd.nextInt(topChoices.size()));
     }
+
+	/**
+	 * @param opinions
+	 * @return
+	 */
+	protected List<Entry<AID, Integer>> shuffleMap(Map<AID, Integer> opinions) {
+		List<Entry<AID, Integer>> list = new ArrayList<Entry<AID, Integer>>(opinions.entrySet());
+        Collections.shuffle(list);
+		return list;
+	}
 
     /**
      * Increase my opinion of agentID by val.
@@ -435,7 +464,7 @@ public abstract class PlayerBehaviour {
      * Decrease my opinion of agentID by val.
      */
     protected void decreaseOpinion(AID agentID, int val) {
-        myOpinionOfOthers.put(currentChancellor, Math.max(0, myOpinionOfOthers.get(agentID) - val));
+        myOpinionOfOthers.put(agentID, Math.max(0, myOpinionOfOthers.get(agentID) - val));
     }
     /**
      * Gets the next President.
@@ -455,7 +484,7 @@ public abstract class PlayerBehaviour {
     protected void printMap(Map<AID, ?> map) {
     	if(map == null)
     		return;
-    	StringBuilder sb = new StringBuilder();
+    	StringBuilder sb = new StringBuilder("\n-------------\n");
     	for (Entry<AID, ?> pair : map.entrySet()) {
     		if(pair.getValue() instanceof AID) {
     			AID aid = (AID) pair.getValue();
@@ -475,6 +504,16 @@ public abstract class PlayerBehaviour {
     	List <Policy> newList = new ArrayList<>();
     	for(Policy o: list)
     		newList.add(o);
+		return newList;    	
+    }
+    /**
+     * Clones a set into a list without cloning the objects.
+     */
+    protected List<Entry<AID, Integer>> cloneSet(Set<Entry<AID, Integer>> set) {
+    	List<Entry<AID, Integer>> newList = new ArrayList<>();
+    	for(Entry<AID, Integer> entry : set) {
+    		newList.add(entry);
+    	}
 		return newList;    	
     }
     /**
@@ -525,4 +564,12 @@ public abstract class PlayerBehaviour {
     	}
     		
     }
+
+	public AID getPlayer(String string) {
+		for(AID player : players) {
+			if(player.getLocalName().equals(string))
+				return player;
+		}
+		return null;
+	}
 }

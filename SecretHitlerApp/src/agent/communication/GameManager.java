@@ -227,42 +227,42 @@ public class GameManager extends Agent {
                     currentPresident = secretHitlerPlayers.get(currentPresidentPointer);
 
                     // Informs about game stats
-                    System.out.println("                     FascistTracker: " + currentGame.getNumberOfFascistCards() +
+                    System.out.println("\n                     FascistTracker: " + currentGame.getNumberOfFascistCards() +
                             "\n                     LiberalTracker: " + currentGame.getNumberOfLiberalCards() +
                             "\n                     Deck size: " + currentGame.deckSize() +
                             "\n                     Discard pile: " + currentGame.discardSize()+"\n");
 
                     // Informs current president
                     sendObjectToAll(ACLMessageSecretHitler.PRESIDENT_CANDIDATE, currentPresident);
-                    System.out.println("Game Manager: Informing current president: " + currentPresident.getLocalName());
+                    System.out.println("Game Manager: The PRESIDENT is: " + currentPresident.getLocalName());
 
                     // Receive players chancellor votes
                     Map<AID, AID> choices = receiveVotesFromAll(ACLMessageSecretHitler.CHANCELLOR_CANDIDATE);
-                    System.out.println("Game Manager: Process Chancellor Votes");
+                    //System.out.println("Game Manager: Process Chancellor Votes");
                     printMap(choices);
 
                     // Informs all players from other players choices
                     sendObjectToAll(ACLMessageSecretHitler.CHANCELLOR_CANDIDATE, (Serializable) choices);
-                    System.out.println("Game Manager: Informing other players choices");
+                    //System.out.println("Game Manager: Informing other players choices");
 
                     // Receives chancellor nomination from president
                     currentChancellor = (AID) receiveObjectFrom(ACLMessageSecretHitler.CHANCELLOR_CANDIDATE, currentPresident);
-                    System.out.println("Game Manager: President nominates chancellor: " + currentChancellor.getLocalName());
+                    System.out.println("Game Manager: President nominates CHANCELLOR: " + currentChancellor.getLocalName());
 
                     // Informs about new chancellor
                     sendObjectToAll(ACLMessageSecretHitler.CHANCELLOR_CANDIDATE, currentChancellor);
-                    System.out.println("Game Manager: Informing new chancellor");
+                    //System.out.println("Game Manager: Informing new chancellor");
 
                     // Receives the players votes for government approval
                     Map<AID, Boolean> governmentVotes = receiveApprovalFromAll();
                     int numberOfApprovals = Collections.frequency(governmentVotes.values(), true);
                     int numberOfDisapproval = Collections.frequency(governmentVotes.values(), false);
-                    System.out.println("Game Manager: Received government approval votes");
+                    //System.out.println("Game Manager: Received government approval votes");
                     printMap(governmentVotes);
 
                     // Informs all players about others votes to government approval
                     sendObjectToAll(ACLMessageSecretHitler.VOTE, (Serializable) governmentVotes);
-                    System.out.println("Game Manager: Informs government votes");
+                    //System.out.println("Game Manager: Informs government votes");
 
                     // If government is approved then pass to policies
                     if (numberOfApprovals > numberOfDisapproval) {
@@ -278,7 +278,7 @@ public class GameManager extends Agent {
 
                             // Broadcasts the final policy to all players
                             sendObjectToAll(ACLMessageSecretHitler.FINAL_POLICY, nextPolicy);
-                            System.out.println("3rd failed government. Enact new policy: " + nextPolicy);
+                            System.out.println("3rd failed government. Enact NEW POLICY: " + nextPolicy);
                             currentGame.newPolicy(nextPolicy);
                             if (currentGame.isDone()) {
                                 if (currentGame.getNumberOfFascistCards() >= 6) {
@@ -334,15 +334,15 @@ public class GameManager extends Agent {
 
                 // Passes next 3 policies to the president
                 sendObject(ACLMessageSecretHitler.CHOOSE_POLICY, (Serializable) next3Policies, currentPresident);
-                System.out.println("Game Manager: Sends next 3 policies to president");
+                //System.out.println("Game Manager: Sends next 3 policies to president");
 
                 // Receives cards from president
                 List<Policy> presidentPolicies = (List<Policy>) receiveObjectFrom(ACLMessageSecretHitler.PRESIDENT_CARDS, currentPresident);
-                System.out.println("Game Manager: Receives president cards: " + presidentPolicies);
+                System.out.println("Game Manager: Receives president card claims: " + presidentPolicies);
 
                 // Sends president cards
                 sendObjectToAll(ACLMessageSecretHitler.PRESIDENT_CARDS, (Serializable) presidentPolicies);
-                System.out.println("Game Manager: Informing about president cards");
+                //System.out.println("Game Manager: Informing about president card claims");
 
                 // Receives final policy from chancellor
                 Policy finalPolicy =
@@ -354,11 +354,11 @@ public class GameManager extends Agent {
 
                 // Receives cards from chancellor
                 List<Policy> chancellorPolicies = (List<Policy>) receiveObjectFrom(ACLMessageSecretHitler.CHANCELLOR_CARDS, currentChancellor);
-                System.out.println("Game Manager: Receives Chancellor cards: " + chancellorPolicies);
+                System.out.println("Game Manager: Receives Chancellor card claims: " + chancellorPolicies);
 
                 // Broadcasts the final policy to all players
                 sendObjectToAll(ACLMessageSecretHitler.FINAL_POLICY, finalPolicy);
-                System.out.println("Game Manager: Informs all about final policy");
+                //System.out.println("Game Manager: Informs all about final policy");
 
                 // Checks if the game ends
                 if (currentGame.isDone()) {
@@ -373,7 +373,7 @@ public class GameManager extends Agent {
 
                 // Sends chancellor cards
                 sendObjectToAll(ACLMessageSecretHitler.CHANCELLOR_CARDS, (Serializable) chancellorPolicies);
-                System.out.println("Game Manager: Informing about chancellor cards");
+                //System.out.println("Game Manager: Informing about chancellor card claims");
 
                 // Receives message for next step
                 int nextStep = (int) receiveObjectFrom(ACLMessageSecretHitler.INFORM, currentPresident);
@@ -402,12 +402,12 @@ public class GameManager extends Agent {
 
                 // Receive players investigation choices
                 Map<AID, AID> investigationChoices = receiveVotesFromAll(ACLMessageSecretHitler.INVESTIGATE);
-                System.out.println("Game Manager: Receives investigation choices");
+                //System.out.println("Game Manager: Receives investigation choices");
                 printMap(investigationChoices);
 
                 // Inform players of others choices
                 sendObjectToAll(ACLMessageSecretHitler.INVESTIGATE, (Serializable) investigationChoices);
-                System.out.println("Game Manager: Informing about investigation choices");
+                //System.out.println("Game Manager: Informing about investigation choices");
 
                 // Receives investigated player status from president
                 String investigatedPlayer = (String) receiveObjectFrom(ACLMessageSecretHitler.INVESTIGATE, currentPresident);
@@ -415,7 +415,7 @@ public class GameManager extends Agent {
 
                 // Informs all other players about the investigated player
                 sendObjectToAll(ACLMessageSecretHitler.INVESTIGATE, investigatedPlayer);
-                System.out.println("Game Manager: Informing investigated player");
+                //System.out.println("Game Manager: Informing investigated player");
             }
 
             /**
@@ -440,7 +440,7 @@ public class GameManager extends Agent {
 
                 // Informs the cards the president claims it has observed
                 sendObjectToAll(ACLMessageSecretHitler.PEEK, (Serializable) observedPolicies);
-                System.out.println("Game Manager: Informing about what president observed");
+                //System.out.println("Game Manager: Informing about what president observed");
             }
 
             /**
@@ -454,12 +454,12 @@ public class GameManager extends Agent {
 
                 // Receive players execution choices
                 Map<AID, AID> executionChoices = receiveVotesFromAll(ACLMessageSecretHitler.EXECUTE);
-                System.out.println("Game Manager: Receives execution choices");
+                //System.out.println("Game Manager: Receives execution choices");
                 printMap(executionChoices);
 
                 // Inform players of others choices
                 sendObjectToAll(ACLMessageSecretHitler.EXECUTE, (Serializable) executionChoices);
-                System.out.println("Game Manager: Informing about execution choices");
+                //System.out.println("Game Manager: Informing about execution choices");
 
                 // Receives message of executed player
                 AID deadPlayer = (AID) receiveObjectFrom(ACLMessageSecretHitler.DEAD, null);
@@ -467,7 +467,7 @@ public class GameManager extends Agent {
 
                 // Informs all other players about the killed player
                 sendObjectToAll(ACLMessageSecretHitler.DEAD, deadPlayer);
-                System.out.println("Game Manager: Informing about executed player");
+                System.out.println("Game Manager: Informing about executed player: "+deadPlayer.getLocalName());
 
                 // Checks if the killed player is hitler
                 boolean hitlerKilled = deadPlayer.equals(hitler);

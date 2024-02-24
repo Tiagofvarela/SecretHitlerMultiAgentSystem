@@ -337,9 +337,9 @@ public class PlayerAgent extends Agent {
 
                 // Process investigation
                 String[] info = playerInvestigated.split(";");
-                StringACLCodec codec = new StringACLCodec(new StringReader(info[0]), null);
-                AID aid_rec = codec.decodeAID();
-                playerBehaviour.processInvestigation(aid_rec, info[1].equals("true"));
+                //StringACLCodec codec = new StringACLCodec(new StringReader(info[0]), null);
+                //AID aid_rec = codec.decodeAID();                
+                playerBehaviour.processInvestigation(playerBehaviour.getPlayer(info[0]), info[1].equals("true"));
             }
 
             /**
@@ -388,7 +388,7 @@ public class PlayerAgent extends Agent {
                 Boolean investigationResults = (Boolean) receiveObject(ACLMessageSecretHitler.INVESTIGATE);
 
                 // Informs the manager of the investigation data
-                String playerInfo = chosenPlayer + ";" + playerBehaviour.explainInvestigation(chosenPlayer, investigationResults);
+                String playerInfo = chosenPlayer.getLocalName() + ";" + playerBehaviour.explainInvestigation(chosenPlayer, investigationResults);
                 sendObject(ACLMessageSecretHitler.INVESTIGATE, playerInfo, gameManager);
 
                 // Receives the investigated player
